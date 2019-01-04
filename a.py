@@ -76,12 +76,13 @@ class DQN(nn.Module):
     def __init__(self):
         super(DQN, self).__init__()
         self.fc1 = nn.Linear(10, 128)  # 2 input nodes, 50 in middle layers
+        self.bn = nn.BatchNorm1d(128)
         self.fc2 = nn.Linear(128, 2)  # 50 middle layer, 1 output node
         self.rl1 = nn.ReLU()
-        self.rl2 = nn.ReLU()
         self.sm = nn.Softmax()
     def forward(self, x):
         x = self.fc1(x)
+        x = self.bn(x)
         x = self.rl1(x)
         x = self.fc2(x)
         x = self.sm(x)
@@ -117,7 +118,9 @@ def select_action(state):
     steps_done += 1
     if sample > eps_threshold:
         with torch.no_grad():
+            policy_net.eval()
             r = policy_net(state).max(1)[1].view(1, 1)
+            policy_net.train()
             print('state:',state[0], 'action', r)
             return r
     else:
@@ -128,6 +131,7 @@ episode_durations = []
 
 # 요거는 에피소드가 진행됨에 따라 몇스텝이나 살아남았는지를 y축에 두고 누적그래프를 그려주는 코드이다.
 def plot_durations():
+    return
     plt.figure(2)
     plt.clf()
     durations_t = torch.tensor(episode_durations, dtype=torch.float)
@@ -205,10 +209,12 @@ def optimize_model():
 # 그리고 reward구조를 보면 step을 돌렸을때 살아남기만 하면 1.0을 주고
 # pole의 기울기가 너무 커지면 done이 True가 되면서 에피소드가 끝나는 구조이다.
 # 마지막에 done이 True일때 reward가 0으로 반영되는지는 확인안해봤는데 나중에 확인해보자. 0이라면 터미널 패널티가 있는 셈일듯 
-num_episodes = 5000
+num_episodes = 300
 for i_episode in range(num_episodes):
     # Initialize the environment and state
     a = 1.0 * random.randrange(1,3)
+    if a==1: a=1000.0
+    else: a = 2000.0
     # a = 2.0
     state = torch.tensor([a] * 10)
     state = state.unsqueeze(0).to(device)
@@ -219,11 +225,11 @@ for i_episode in range(num_episodes):
         # _, reward, done, _ = env.step(action.item())
         reward = 0.0
         if action.item()==0:
-            if state[0][0]>=2: reward = 100000.0
-            # else : reward = -10.0
-        # else: 
-            # if state[0][0]<2: reward = 1.0
-            # else : reward = -100.0
+            if state[0][0]>=1500: reward = 1.0
+            else : reward = -1.0
+        else: 
+            if state[0][0]<1500: reward = 1.0
+            else : reward = -1.0
 
         done = False
         if random.randrange(1, 10)==1:
