@@ -213,8 +213,8 @@ num_episodes = 300
 for i_episode in range(num_episodes):
     # Initialize the environment and state
     a = 1.0 * random.randrange(1,3)
-    if a==1: a=1000.0
-    else: a = 2000.0
+    if a==1: a=10000.0
+    else: a = 20000.0
     # a = 2.0
     state = torch.tensor([a] * 10)
     state = state.unsqueeze(0).to(device)
@@ -225,10 +225,10 @@ for i_episode in range(num_episodes):
         # _, reward, done, _ = env.step(action.item())
         reward = 0.0
         if action.item()==0:
-            if state[0][0]>=1500: reward = 1.0
+            if state[0][0]>=15000: reward = 1.0
             else : reward = -1.0
         else: 
-            if state[0][0]<1500: reward = 1.0
+            if state[0][0]<15000: reward = 1.0
             else : reward = -1.0
 
         done = False

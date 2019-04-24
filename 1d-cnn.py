@@ -1,5 +1,9 @@
 # Compatibility layer between Python 2 and Python 3
 from __future__ import print_function
+
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
+
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
