@@ -1,10 +1,12 @@
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_wine
 
-data = load_iris()
+# 데이터 로딩
+data = load_wine()
 X, y = data.data, data.target
 
 from sklearn.model_selection import train_test_split
 
+# 데이터 분할
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 from sklearn.tree import DecisionTreeClassifier
