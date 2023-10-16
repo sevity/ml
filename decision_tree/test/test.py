@@ -1,36 +1,30 @@
 from sklearn.datasets import load_wine
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.model_selection import cross_val_score
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 import xgboost as xgb
+import numpy as np
 
 # 데이터 로딩
 data = load_wine()
 X, y = data.data, data.target
 
-# 데이터 분할
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# 디시전 트리 모델 생성 및 학습
+# 디시전 트리 모델 생성
 dt = DecisionTreeClassifier()
-dt.fit(X_train, y_train)
 
-# 랜덤 포레스트 모델 생성 및 학습
+# 랜덤 포레스트 모델 생성
 rf = RandomForestClassifier()
-rf.fit(X_train, y_train)
 
-# XGBoost 모델 생성 및 학습
+# XGBoost 모델 생성
 xg_cls = xgb.XGBClassifier()
-xg_cls.fit(X_train, y_train)
 
-# 모델 평가
-y_pred_dt = dt.predict(X_test)
-print(f'Decision Tree Accuracy: {accuracy_score(y_test, y_pred_dt)}')
+# 교차 검증 수행 (5-fold CV)
+cv_scores_dt = cross_val_score(dt, X, y, cv=5)
+cv_scores_rf = cross_val_score(rf, X, y, cv=5)
+cv_scores_xgb = cross_val_score(xg_cls, X, y, cv=5)
 
-y_pred_rf = rf.predict(X_test)
-print(f'Random Forest Accuracy: {accuracy_score(y_test, y_pred_rf)}')
-
-y_pred_xgb = xg_cls.predict(X_test)
-print(f'XGBoost Accuracy: {accuracy_score(y_test, y_pred_xgb)}')
+# 평균 정확도 출력
+print(f'Decision Tree CV Accuracy: {np.mean(cv_scores_dt):.2f}')
+print(f'Random Forest CV Accuracy: {np.mean(cv_scores_rf):.2f}')
+print(f'XGBoost CV Accuracy: {np.mean(cv_scores_xgb):.2f}')
 
